@@ -1,0 +1,19 @@
+# Environment Variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+
+# Backup files
+.env.backup
+.env.*.backup
+
+# IDE specific files
+.idea
+.vscode
+*.swp
+*.swo
+.venv
+src/notion_mcp/__pycache__/*

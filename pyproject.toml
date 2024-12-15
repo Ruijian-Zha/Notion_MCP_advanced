@@ -1,0 +1,16 @@
+[project]
+name = "notion_mcp"
+version = "0.1.0"
+description = "Notion MCP integration for todo lists"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp",
+    "httpx",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
