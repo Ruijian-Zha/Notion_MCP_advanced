@@ -25,6 +25,7 @@ While you can use this as a starting point for your own Notion integration, you'
 - View all todos
 - View today's tasks
 - Check off a task as complete
+- Task Description (New Feature)
 
 ## Prerequisites
 
