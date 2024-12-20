@@ -66,7 +66,7 @@ async def fetch_todos() -> dict:
         response.raise_for_status()
         return response.json()
 
-async def create_todo(task: str, when: str, description: str = "") -> dict:
+async def create_todo(task: str, description: str = "", link: str = "") -> dict:
     """Create a new todo in Notion"""
     async with httpx.AsyncClient() as client:
         response = await client.post(
@@ -79,21 +79,28 @@ async def create_todo(task: str, when: str, description: str = "") -> dict:
                         "type": "title",
                         "title": [{"type": "text", "text": {"content": task}}]
                     },
-                    "When": {
-                        "type": "select",
-                        "select": {"name": when}
-                    },
                     "Checkbox": {
                         "type": "checkbox",
                         "checkbox": False
                     },
                     "Description": {
-                        "type": "rich_text",  # Changed from "text" to "rich_text"
-                        "rich_text": [        # Changed structure to match test code
+                        "type": "rich_text",
+                        "rich_text": [
                             {
                                 "type": "text",
                                 "text": {
                                     "content": description
+                                }
+                            }
+                        ]
+                    },
+                    "Link": {
+                        "type": "rich_text",
+                        "rich_text": [
+                            {
+                                "type": "text",
+                                "text": {
+                                    "content": link
                                 }
                             }
                         ]
@@ -136,17 +143,16 @@ async def list_tools() -> list[Tool]:
                         "type": "string",
                         "description": "The todo task name"
                     },
-                    "when": {
-                        "type": "string",
-                        "description": "When the task should be done (today or later)",
-                        "enum": ["today", "later"]
-                    },
                     "description": {
                         "type": "string",
                         "description": "Additional details about the task",
+                    },
+                    "link": {
+                        "type": "string",
+                        "description": "Optional URL or reference link for the task",
                     }
                 },
-                "required": ["task", "when"]  # Description remains optional
+                "required": ["task"]
             }
         ),
         Tool(
@@ -191,20 +197,18 @@ async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | Embedde
             raise ValueError("Invalid arguments")
             
         task = arguments.get("task")
-        when = arguments.get("when", "later")
-        description = arguments.get("description", "")  # Get description
+        description = arguments.get("description", "")
+        link = arguments.get("link", "")
     
         if not task:
             raise ValueError("Task is required")
-        if when not in ["today", "later"]:
-            raise ValueError("When must be 'today' or 'later'")
             
         try:
-            result = await create_todo(task, when, description)
+            result = await create_todo(task, description, link)
             return [
                 TextContent(
                     type="text",
-                    text=f"Added todo: {task} (scheduled for {when})"
+                    text=f"Added todo: {task}"
                 )
             ]
         except httpx.HTTPError as e:
@@ -223,12 +227,11 @@ async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | Embedde
             for todo in todos.get("results", []):
                 props = todo["properties"]
                 formatted_todo = {
-                    "id": todo["id"],  # Include the page ID in the response
+                    "id": todo["id"],
                     "task": props["Task"]["title"][0]["text"]["content"] if props["Task"]["title"] else "",
                     "completed": props["Checkbox"]["checkbox"],
-                    "when": props["When"]["select"]["name"] if props["When"]["select"] else "unknown",
-                    "description": props["Description"]["rich_text"][0]["text"]["content"] if props["Description"]["rich_text"] else "",  # Updated for rich_text type
-                    "created": todo["created_time"]
+                    "description": props["Description"]["rich_text"][0]["text"]["content"] if props["Description"]["rich_text"] else "",
+                    "link": props["Link"]["rich_text"][0]["text"]["content"] if props["Link"]["rich_text"] else "",
                 }
                 
                 if name == "show_today_todos" and formatted_todo["when"].lower() != "today":
