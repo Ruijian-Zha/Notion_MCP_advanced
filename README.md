@@ -10,10 +10,11 @@ A simple Model Context Protocol (MCP) server that integrates with Notion's API t
 
 ## Important Note
 
-This is a personal project designed for a very specific use case: my simple Notion todo list that has just three properties:
+This is a personal project designed for a very specific use case: my simple Notion todo list that has just four properties:
 - Task (title)
-- When (select with only two options: "today" or "later")
 - Checkbox (marks if completed)
+- Description (additional details)
+- Link (URL or reference)
 
 [Example Notion Database](https://danhilse.notion.site/14e5549555a08078afb5ed5d374bb656?v=14e5549555a081f9b5a4000cdf952cb9&pvs=4)
 
@@ -21,11 +22,10 @@ While you can use this as a starting point for your own Notion integration, you'
 
 ## Features
 
-- Add new todo items
+- Add new todo items with descriptions and links
 - View all todos
-- View today's tasks
-- Check off a task as complete
-- Task Description (New Feature)
+- Check off tasks as complete
+- Link external resources to tasks
 
 ## Prerequisites
 
@@ -99,25 +99,17 @@ Note: When running directly, the server won't show any output unless there's an 
 
 Basic commands through Claude:
 - "Show all my todos"
-- "What's on my list for today?"
-- "Add a todo for today: check emails"
-- "Add a task for later: review project"
+- "Add a todo: check emails"
+- "Add a todo: review project docs, with link: https://example.com/docs"
+- "Mark todo [ID] as complete"
 
 ## Limitations
 
 - Only works with a specific Notion database structure
 - No support for complex database schemas
-- Limited to "today" or "later" task scheduling
-- No support for additional properties or custom fields
 - Basic error handling
+- No support for additional properties or custom fields
 - No advanced features like recurring tasks, priorities, or tags
-
-## Customization
-
-If you want to use this with a different database structure, you'll need to modify the `server.py` file, particularly:
-- The `create_todo()` function to match your database properties
-- The todo formatting in `call_tool()` to handle your data structure
-- The input schema in `list_tools()` if you want different options
 
 ## Project Structure
 ```
