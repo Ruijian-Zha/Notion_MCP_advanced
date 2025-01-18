@@ -66,7 +66,7 @@ async def fetch_todos() -> dict:
         response.raise_for_status()
         return response.json()
 
-async def create_todo(task: str, description: str = "", link: str = "") -> dict:
+async def create_todo(task: str, description: str = "", link: str = "", priority_level: str = "") -> dict:
     """Create a new todo in Notion"""
     async with httpx.AsyncClient() as client:
         response = await client.post(
@@ -104,6 +104,12 @@ async def create_todo(task: str, description: str = "", link: str = "") -> dict:
                                 }
                             }
                         ]
+                    },
+                    "Priority Level": {
+                        "type": "select",
+                        "select": {
+                            "name": priority_level
+                        }
                     }
                 }
             }
@@ -146,6 +152,11 @@ async def list_tools() -> list[Tool]:
                     "description": {
                         "type": "string",
                         "description": "Additional details about the task",
+                    },
+                    "priority_level": {
+                        "type": "string",
+                        "description": "Priority level of the task",
+                        "enum": ["plan", "hold", "ongoing"]
                     },
                     "link": {
                         "type": "string",
@@ -199,12 +210,13 @@ async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | Embedde
         task = arguments.get("task")
         description = arguments.get("description", "")
         link = arguments.get("link", "")
+        priority_level = arguments.get("priority_level", "")
     
         if not task:
             raise ValueError("Task is required")
             
         try:
-            result = await create_todo(task, description, link)
+            result = await create_todo(task, description, link, priority_level)
             return [
                 TextContent(
                     type="text",
